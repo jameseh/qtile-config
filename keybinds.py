@@ -3,6 +3,7 @@
 from libqtile.config import Key, Drag, Click
 from libqtile.lazy import lazy
 
+from groups import group_names
 
 # Set modifier key
 mod = "mod4"
@@ -115,3 +116,8 @@ mouse = [
          start=lazy.window.get_size()),
     Click([mod], "Button2", lazy.window.focus())
 ]
+
+# Bind the key combinations to switch to the groups.
+for num, name in enumerate(group_names, 1):
+    keys.append(Key([mod], str(num), lazy.group[name].toscreen()))
+    keys.append(Key([mod, "shift"], str(num), lazy.window.togroup(name)))
