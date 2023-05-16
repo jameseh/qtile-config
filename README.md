@@ -40,6 +40,10 @@ Customize the configuration to suit your preferences by modifying the individual
 
 Feel free to reach out by opening an issue on the GitHub repository if you need any assistance or have questions regarding customization.
 
+## Dependencies
+
+This configuration does not have any external dependencies.
+
 ## License
 
 This project is licensed under the MIT License. For detailed information, please refer to the [LICENSE](https://github.com/jameseh/qtile-config/blob/main/LICENSE) file.
