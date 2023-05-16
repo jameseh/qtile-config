@@ -1,0 +1,9 @@
+launchdunst
+polkit
+powerkit
+udiskie
+copyq
+kdeconnectd
+firefox-developer-edition
+alacritty
+~/.screenlayout/default.sh
