@@ -3,7 +3,6 @@
 from libqtile.config import Key, Group
 from libqtile.lazy import lazy
 
-from keybinds import keys, mod
 from layouts import layouts
 
 
