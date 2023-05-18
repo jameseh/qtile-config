@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 from libqtile.config import Screen
 from libqtile import bar
 
@@ -11,7 +12,7 @@ screens = [
         Screen(
             top=bar.Bar(
                 widgets=widget_list,
-                size=40,
+                size=30,
                 opacity=1,
                 border_width=3,
                 border_color=colors["background"][1],
@@ -22,7 +23,7 @@ screens = [
         Screen(
             top=bar.Bar(
                 widgets=widget_list,
-                size=40,
+                size=30,
                 opacity=1,
                 border_width=3,
                 border_color=colors["background"][1],

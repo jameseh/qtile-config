@@ -18,7 +18,7 @@ from utils.process_manager import ProcessManager
 programs_file = Path.home().joinpath(".config", "qtile", "programs.txt")
 process_manager = ProcessManager(programs_file)
 
-# Set defaults
+# Set widget defaults
 widget_defaults = dict(
     font='Noto Sans Mono',
     fontsize=12,

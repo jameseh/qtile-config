@@ -5,6 +5,7 @@ from libqtile.lazy import lazy
 
 from groups import group_names
 
+
 # Set modifier key
 mod = "mod4"
 
