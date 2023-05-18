@@ -7,7 +7,7 @@ from keybinds import terminal
 # Define widgets to be used on screen bar
 widget_list = [
     widget.Spacer(
-        length=30,
+        length=20,
         background=colors["background"][0]),
 
     widget.Image(
@@ -17,8 +17,8 @@ widget_list = [
 
     widget.GroupBox(
         font="Material Icons",
-        fontsize=26,
-        padding=20,
+        fontsize=20,
+        padding=10,
         borderwidth=2,
         highlight_method='text',
         foreground=colors["primary"][0],
@@ -33,14 +33,10 @@ widget_list = [
 
     widget.TextBox(
         font="Material Icons",
-        fontsize=26,
+        fontsize=20,
         text="cable",
         foreground=colors["primary"][1],
         background=colors["background"][0]),
-
-    widget.Spacer(
-        length=5,
-        backgrou1nd=colors["background"][0]),
 
     widget.CPU(
         format="{freq_current}GHz {load_percent}%",
@@ -49,19 +45,11 @@ widget_list = [
         mouse_callbacks={'Button1': lambda: qtile.cmd_spawn(
             f"{terminal} -e htop")}),
 
-    widget.Spacer(
-        length=20,
-        background=colors["background"][0]),
-
     widget.TextBox(
         font="Material Icons",
-        fontsize=26,
+        fontsize=20,
         text="device_thermostat",
         foreground=colors["primary"][2],
-        background=colors["background"][0]),
-
-    widget.Spacer(
-        length=5,
         background=colors["background"][0]),
 
     widget.ThermalSensor(
@@ -73,19 +61,11 @@ widget_list = [
         mouse_callbacks={lazy.spawn('cpupower-gui')},
         update_interval=1),
 
-    widget.Spacer(
-        length=20,
-        background=colors["background"][0]),
-
     widget.TextBox(
         font="Material Icons",
-        fontsize=26,
+        fontsize=20,
         text="memory",
         foreground=colors["primary"][3],
-        background=colors["background"][0]),
-
-    widget.Spacer(
-        length=5,
         background=colors["background"][0]),
 
     widget.Memory(
@@ -102,24 +82,16 @@ widget_list = [
 
     widget.Systray(
         background=colors["background"][0],
-        icon_size=26,
+        icon_size=20,
         padding=20,
         borderwidth=0,
         border_color=colors["additional"][0]),
 
-    widget.Spacer(
-        length=20,
-        background=colors["background"][0]),
-
     widget.TextBox(
         font="Material Icons",
-        fontsize=26,
+        fontsize=20,
         text="wifi",
         foreground=colors["primary"][4],
-        background=colors["background"][0]),
-
-    widget.Spacer(
-        length=5,
         background=colors["background"][0]),
 
     widget.Net(
@@ -129,19 +101,11 @@ widget_list = [
         mouse_callbacks={'Button1': lambda: qtile.cmd_spawn(
             "wofi-wifi-menu")}),
 
-    widget.Spacer(
-        length=20,
-        background=colors["background"][0]),
-
     widget.TextBox(
         font="Material Icons",
-        fontsize=26,
+        fontsize=20,
         text="volume_up",
         foreground=colors["primary"][5],
-        background=colors["background"][0]),
-
-    widget.Spacer(
-        length=5,
         background=colors["background"][0]),
 
     widget.Volume(
@@ -150,19 +114,11 @@ widget_list = [
         format="{percent:1.0%}",
         update_interval=1),
 
-    widget.Spacer(
-        length=20,
-        background=colors["background"][0]),
-
     widget.TextBox(
         font="Material Icons",
-        fontsize=26,
+        fontsize=20,
         text="battery_std",
         foreground=colors["primary"][6],
-        background=colors["background"][0]),
-
-    widget.Spacer(
-        length=5,
         background=colors["background"][0]),
 
     widget.Battery(
@@ -170,19 +126,11 @@ widget_list = [
         background=colors["background"][0],
         format="{percent:1.0%}"),
 
-    widget.Spacer(
-        length=20,
-        background=colors["background"][0]),
-
     widget.TextBox(
         font="Material Icons",
-        fontsize=26,
+        fontsize=20,
         text="calendar_month",
         foreground=colors["primary"][7],
-        background=colors["background"][0]),
-
-    widget.Spacer(
-        length=5,
         background=colors["background"][0]),
 
     widget.Clock(
@@ -190,25 +138,15 @@ widget_list = [
         foreground=colors["text"][0],
         background=colors["background"][0]),
 
-    widget.Spacer(
-        length=5,
-        background=colors["background"][0]),
-
     widget.TextBox(
         font="Material Icons",
-        fontsize=26,
+        fontsize=20,
         text="access_time",
         foreground=colors["primary"][8],
-        background=colors["background"][0]),
-    widget.Spacer(
-        length=10,
         background=colors["background"][0]),
 
     widget.Clock(
         format='%I:%M:%S %p',
         foreground=colors["text"][0],
         background=colors["background"][0]),
-
-    widget.Spacer(
-        length=30,
-        background=colors["background"][0])]
+    ]

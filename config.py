@@ -21,7 +21,7 @@ process_manager = ProcessManager(programs_file)
 # Set defaults
 widget_defaults = dict(
     font='Noto Sans Mono',
-    fontsize=15,
+    fontsize=12,
     padding=5,
 )
 
