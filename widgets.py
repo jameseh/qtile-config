@@ -149,4 +149,8 @@ widget_list = [
         format='%I:%M:%S %p',
         foreground=colors["text"][0],
         background=colors["background"][0]),
+    
+    widget.Spacer(
+        length=20,
+        background=colors["background"][0]),
     ]
