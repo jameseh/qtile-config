@@ -15,8 +15,8 @@ from utils.process_manager import ProcessManager
 
 
 # Initiate processmanager to autostart and kill applications
-programs_file_path = Path.cwd().joinpath("programs.txt")
-process_manager = ProcessManager(programs_file_path)
+programs_file = Path.home().joinpath(".config", "qtile", "programs.txt")
+process_manager = ProcessManager(programs_file)
 
 # Set defaults
 widget_defaults = dict(
