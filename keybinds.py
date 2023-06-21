@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 from libqtile.config import Key, Drag, Click
 from libqtile.lazy import lazy
 

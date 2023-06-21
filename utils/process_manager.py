@@ -1,3 +1,5 @@
+# -*- mode: python ; coding: utf-8 -*-
+
 import sys
 import subprocess
 from pathlib import Path
