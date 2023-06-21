@@ -6,6 +6,38 @@ import psutil
 
 
 class ProcessManager:
+    """
+       A simple process manager that can start and kill processes.
+
+       The process manager takes a list of programs and the number of instances
+       to start for each program. It will start the specified number of
+       instances of each program, and will kill all of the processes when it
+       is destroyed.
+
+    Usage:
+
+        ```
+        process_manager = ProcessManager("programs.txt")
+        process_manager.start_processes()
+        print(f"{len(process_manager.processes)} processes are running")
+        process_manager.kill_processes()
+        ```
+
+    Programs file format:
+
+        The programs file is a text file that contains a list of programs and
+        the number of instances to start for each program. Each line in the
+        file should be in the format program_name number_of_instances. If the
+        number of instances is not specified, it defaults to 1.
+
+        For example, the following lines would start two instances of the
+        alacritty program and one instance of the firefox program:
+
+        ```
+        alacritty 2
+        firefox
+        ```
+    """
     def __init__(self, programs_file):
         self.programs_file = Path(programs_file)
         self.processes = []
