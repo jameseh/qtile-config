@@ -42,7 +42,7 @@ Feel free to reach out by opening an issue on the GitHub repository if you need 
 
 ## Dependencies
 
-1. [PSUtil][https://psutil.readthedocs.io/en/latest/] >= 5.9.5
+1. [PSUtil](https://psutil.readthedocs.io/en/latest/) >= 5.9.5
 
 ## License
 
