@@ -1,9 +1,8 @@
-launchdunst
-polkit
-powerkit
-udiskie
+/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+dunst
 copyq
 kdeconnectd
 firefox-developer-edition
-alacritty
+picom
+alacritty 3
 ~/.screenlayout/default.sh

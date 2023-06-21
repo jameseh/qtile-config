@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from libqtile.config import Key, Drag, Click
 from libqtile.lazy import lazy
 
@@ -99,7 +98,8 @@ keys = [
     Key([mod, "shift"], "c", lazy.spawn('copyq toggle')),
 
     # Rofi launcher
-    Key([mod], "space", lazy.spawn('launcher_t1')),
+    Key([mod], "space", lazy.spawn(
+        '/home/james/.config/rofi/scripts/launcher_t1')),
 
     # Bitwarden
     Key([mod], "BackSpace", lazy.spawn(
