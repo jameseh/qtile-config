@@ -51,31 +51,13 @@ class ProcessManager:
 
     def kill_processes(self):
         for process in self.processes:
-            # Only try to kill the process if it's still running
-            if process.poll() is None:
-                try:
-                    # Try to terminate the process gracefully
-                    process.terminate()
-                    # Give the process some time to terminate gracefully
-                    process.wait(timeout=5)
+            # Terminate the process and all of its children
+            gone, alive = psutil.wait_procs(
+                    [process], timeout=5, callback=on_terminate)
 
-                except subprocess.TimeoutExpired:
-                    # If the process didn't terminate within the timeout,
-                    # kill it
-                    gone, alive = psutil.wait_procs(
-                        [process], timeout=5, callback=on_terminate)
-                    if process in alive:
-                        process.kill()
-
-                except OSError:
-                    # Ignore any errors that occur
-                    pass
-
-        # Now kill any child processes that are still running
-        for process in self.processes:
-            for child_process in process.children():
-                if child_process.poll() is None:
-                    child_process.kill()
+            # If any child processes are still alive, kill them
+            for child_process in alive:
+                child_process.kill()
 
 
 def on_terminate(proc):

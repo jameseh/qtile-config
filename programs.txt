@@ -2,7 +2,6 @@
 dunst
 copyq
 kdeconnectd
-firefox-developer-edition
+firefox
 picom
 alacritty 3
-~/.screenlayout/default.sh
