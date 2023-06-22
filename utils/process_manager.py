@@ -79,7 +79,7 @@ class ProcessManager:
                             process = subprocess.Popen(
                                 Path(program_name), shell=False)
                             self.processes.append(process)
-                        except subprocess.CalledProcessError:
+                        except Exception:
                             # Ignore any errors that occur
                             pass
 
