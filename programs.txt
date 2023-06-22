@@ -4,4 +4,5 @@ copyq
 kdeconnectd
 firefox
 picom
+rog-control-center
 alacritty 3

@@ -55,37 +55,37 @@ wmname = "LG3D"
 @hook.subscribe.client_new
 def assign_window_to_group(client):
     # Compile regular expressions to match the window classes or titles
-    firefox_regex = re.compile(r"^Mozilla.*")
-    alacritty_regex = re.compile(r"^Alacritty$")
-    discord_regex = re.compile(r"^Discord$")
-    signal_regex = re.compile(r"^Signal$")
-    libreoffice_regex = re.compile(r"^Libre.*")
-    pycharm_regex = re.compile(r"^PyCharm$")
-    webstorm_regex = re.compile(r"^WebStorm$")
-    idea_regex = re.compile(r"^IntelliJ IDEA$")
-    rider_regex = re.compile(r"^Rider$")
-    vlc_regex = re.compile(r"^VLC$")
+    firefox_regex = re.compile(r"^mozilla.*", re.IGNORECASE)
+    alacritty_regex = re.compile(r"^alacritty$", re.IGNORECASE)
+    discord_regex = re.compile(r"^discord.*", re.IGNORECASE)
+    signal_regex = re.compile(r"^signal$", re.IGNORECASE)
+    libreoffice_regex = re.compile(r"^libre.*", re.IGNORECASE)
+    pycharm_regex = re.compile(r"^pycharm$", re.IGNORECASE)
+    webstorm_regex = re.compile(r"^webstorm$", re.IGNORECASE)
+    idea_regex = re.compile(r"^intellij idea$", re.IGNORECASE)
+    rider_regex = re.compile(r"^rider$", re.IGNORECASE)
+    vlc_regex = re.compile(r"^vlc$", re.IGNORECASE)
 
     # Assign the window to the appropriate group.
-    if firefox_regex.match(client.window.get_wm_class()[0]) or "Firefox" in \
-            client.name:
+    if firefox_regex.match(client.window.get_wm_class()[0]) or "firefox" in \
+            client.name.lower():
         group = qtile.groups_map["language"]
         keys.append(Key([mod], str(0), lazy.group[client].toscreen()))
         keys.append(Key([mod, "shift"], str(0), lazy.window.togroup(group)))
 
     elif alacritty_regex.match(client.window.get_wm_class()[0]) or \
-            "Alacritty" in client.name:
+            "alacritty" in client.name.lower():
         group = qtile.groups_map["terminal"]
 
     elif any(regex.match(client.window.get_wm_class()[0]) for regex in
              [pycharm_regex, webstorm_regex, idea_regex, rider_regex]) and (
-                     "PyCharm" in client.name or "WebStorm" in
-                     client.name or "IntelliJ IDEA" in client.name or
-                     "Rider" in client.name):
+                     "pycharm" in client.name.lower() or "webstorm" in
+                     client.name.lower() or "intellij idea" in
+                     client.name.lower() or "rider" in client.name.lower()):
         group = qtile.groups_map["code"]
 
-    elif vlc_regex.match(client.window.get_wm_class()[0]) or "VLC" in \
-            client.name:
+    elif vlc_regex.match(client.window.get_wm_class()[0]) or "vlc" in \
+            client.name.lower():
         group = qtile.groups_map["music"]
 
     elif discord_regex.match(client.window.get_wm_class()[0]) or \
