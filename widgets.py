@@ -89,6 +89,10 @@ widget_list = [
         borderwidth=0,
         border_color=colors["additional"][0]),
 
+    widget.Spacer(
+        length=10,
+        background=colors["background"][0]),
+
     widget.TextBox(
         font="Material Icons",
         fontsize=20,
