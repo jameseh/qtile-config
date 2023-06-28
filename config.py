@@ -12,6 +12,7 @@ from groups import groups
 from screens import screens
 from layouts import layouts
 from utils.process_manager import ProcessManager
+from utils.check_hdmi import HDMIMonitor
 
 
 # Initiate processmanager to autostart and kill applications
@@ -102,6 +103,14 @@ def assign_window_to_group(client):
         group = qtile.groups_map["default"]
 
     client.togroup(group.name)
+
+@hook.subscribe.startup
+def hdmi_setup():
+  hdmi_monitor = HDMIMonitor()
+  hdmi_monitor.check_hdmi()
+
+  if hdmi_monitor.hdmi_connected:
+    hdmi_monitor.execute_xrandr_command()
 
 
 @hook.subscribe.startup

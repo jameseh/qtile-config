@@ -6,3 +6,4 @@ firefox
 picom
 rog-control-center
 alacritty 3
+xfce4-power-manager
