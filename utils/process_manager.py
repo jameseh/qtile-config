@@ -1,5 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import re
 import sys
 import subprocess
 from pathlib import Path
@@ -43,6 +44,7 @@ class ProcessManager:
     def __init__(self, programs_file):
         self.programs_file = Path(programs_file)
         self.processes = []
+        self.all_processes_launched = False
 
     def start_processes(self):
         if not self.programs_file.exists():
@@ -54,23 +56,27 @@ class ProcessManager:
             for line in f:
                 # Remove leading and trailing whitespace
                 stripped_line = line.strip()
-                print(stripped_line)
                 # Only start a process if the line isn't empty
                 if stripped_line:
                     try:
                         # Get the program name and number of instances to start
                         (program_name,
-                         number_of_instances) = stripped_line.split()
+                         number_of_instances) = line.rsplit()
                     except ValueError:
                         # Ignore empty lines and lines with only program name
-                        program_name = stripped_line
+                        program_name = line.strip()
                         number_of_instances = 1
+
+                    if program_name.endswith(".py"):
+                        # Set the program_name to the full path of the file
+                        program_name = f"python {program_name}"
 
                     # Count the number of instances of the app running
                     running_processes = len(
                         [process for process in psutil.process_iter()
                          if process.name() == program_name])
 
+                    print(program_name)
                     # Start the remaining instances of the app
                     for _ in range(int(number_of_instances)
                                    - int(running_processes)):
@@ -82,6 +88,8 @@ class ProcessManager:
                         except Exception:
                             # Ignore any errors that occur
                             pass
+
+        self.all_processes_launched = True
 
     def kill_processes(self):
         for process in self.processes:

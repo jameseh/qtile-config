@@ -1,4 +1,4 @@
-/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+polkit-gnome-authentication-agent-1
 dunst
 copyq
 kdeconnectd
@@ -7,3 +7,4 @@ picom
 rog-control-center
 alacritty 3
 xfce4-power-manager
+/home/james/.config/qtile/utils/display_monitor.py
