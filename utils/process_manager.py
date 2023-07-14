@@ -1,6 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
 
-import re
 import sys
 import subprocess
 from pathlib import Path
@@ -67,23 +66,19 @@ class ProcessManager:
                         program_name = line.strip()
                         number_of_instances = 1
 
-                    if program_name.endswith(".py"):
-                        # Set the program_name to the full path of the file
-                        program_name = f"python {program_name}"
-
                     # Count the number of instances of the app running
                     running_processes = len(
                         [process for process in psutil.process_iter()
                          if process.name() == program_name])
 
-                    print(program_name)
                     # Start the remaining instances of the app
                     for _ in range(int(number_of_instances)
                                    - int(running_processes)):
                         try:
                             # Start the process directly
                             process = subprocess.Popen(
-                                Path(program_name), shell=False)
+                                    Path(program_name),
+                                    shell=False)
                             self.processes.append(process)
                         except Exception:
                             # Ignore any errors that occur

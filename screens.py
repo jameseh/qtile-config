@@ -22,7 +22,7 @@ screens = [
         ),
         Screen(
             top=bar.Bar(
-                widgets=widget_list,
+                widgets=None,
                 size=30,
                 opacity=1,
                 border_width=3,

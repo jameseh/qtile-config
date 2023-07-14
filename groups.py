@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from libqtile.config import Key, Group
-from libqtile.lazy import lazy
-
-from layouts import layouts
+from libqtile.config import Group
 
 
 # Set group names to material-icons from material-icons.ttf
@@ -18,6 +15,7 @@ group_names = [
 
 # Set the layouts of each group
 groups = [
-    Group(name, layout="monadtall") if name not in ("language", "text_snippet")
+    Group(name, layout="monadtall") if name not in (
+        "language", "text_snippet")
     else Group(name, layout="max") for name in group_names
 ]

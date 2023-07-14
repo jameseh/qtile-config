@@ -3,14 +3,16 @@ import sys
 import subprocess
 import asyncio
 
-import tkinter as tk
+import gi
+from gi.repository import Gtk
+
 from Xlib import X
 from Xlib import display as X_display
 from Xlib.ext import randr
 
 
 class DisplayMonitor:
-    """A class to monitor and set xorg display configuations."""
+    """A class to monitor and set xorg display configurations."""
 
     def __init__(self):
         self.display = X_display.Display()
@@ -31,13 +33,21 @@ class DisplayMonitor:
             await asyncio.sleep(1)
 
     def handle_event(self, event):
-        print(event)
         if event.type == X.ConfigureNotify:
             displays = self.connected_displays()
-            if displays > self.prev_displays:
-                self.prev_displays = self.displays
-                self.displays = displays
+            primary_display = next(
+                (display for display in self.displays if display[2] == "primary"), None
+            )
+            if all(display[3] == "inactive" for display in displays):
+                self.turn_on_display(
+                    primary_display[0], primary_display[1], primary_display[2], primary_display[3]
+                )
+            elif len(self.prev_displays) < len(displays):
                 self.show_dialog()
+
+            self.prev_displays = self.displays
+            self.displays = self.connected_displays()
+
 
     def connected_displays(self):
         resources = self.root_window.xrandr_get_screen_resources()
@@ -53,25 +63,23 @@ class DisplayMonitor:
                     width = mode.width
                     height = mode.height
                     display_modes.append(f"{width}x{height}")
-                if output == primary_output:
-                    displays.append(
-                            (display_name, display_modes, "primary",
-                             "active" if output_info.crtc != 0 else "inactive")
-                            )
+                display_status = "active" if output_info.crtc != 0 else "inactive"
+                if output_info.crtc == primary_output:
+                    primary_display = (display_name, display_modes, "primary", display_status)
                 else:
                     displays.append(
-                            (display_name, display_modes,
-                             "active" if output_info.crtc != 0 else "inactive")
-                            )
+                        (display_name, display_modes, "extended", display_status)
+                    )
+        if primary_display:
+            displays.insert(0, primary_display)
         return displays
-
 
     def check_for_extensions(self):
         randr_extension = self.display.query_extension('RANDR')
         if not randr_extension.present:
             sys.stderr.write(
-                    '{}: server does not have the RANDR extension\n'.format(
-                        sys.argv[0]))
+                '{}: server does not have the RANDR extension\n'.format(
+                    sys.argv[0]))
             sys.exit(1)
 
         r = self.display.xrandr_query_version()
@@ -83,13 +91,30 @@ class DisplayMonitor:
             if len(self.displays) > 1:
                 self.show_dialog()
 
-    def turn_on_display(self, display_name, mode, primary):
-        subprocess.Popen(f"xrandr --output {display_name} \
-        {'--primary' if primary else ''} --mode {mode} --pos 0x0 \
-        --rotate  normal", shell=True)
+    def calculate_display_position(self):
+        active_displays = [display for display in self.displays if display[3] == "active"]
+        if active_displays:
+            previous_display = active_displays[-1]
+            previous_width = int(previous_display[1][0].split("x")[0])
+            position = f"{previous_width}x0"
+        else:
+            position = "0x0"
+        return position
 
-    def turn_off_display(self, display_name):
-        subprocess.Popen(f"xrandr --output {display_name} --off", shell=True)
+    def turn_on_display(self, display_name, modes, primary, state):
+        if state == "inactive":
+            position = self.calculate_display_position(display_name)
+            primary_option = "--primary" if primary == "primary" else ""
+            mode_option = "--mode " + modes[0] if modes else ""
+            subprocess.Popen(
+                f"xrandr --output {display_name} {primary_option} {mode_option} "
+                f"--pos {position} --rotate normal",
+                shell=True
+            )
+
+    def turn_off_display(self, display_name, state):
+        if state == "active":
+            subprocess.Popen(f"xrandr --output {display_name} --off", shell=True)
 
     def show_dialog(self):
         dialog = DisplayDialog(self)
@@ -100,81 +125,135 @@ class DisplayDialog:
     def __init__(self, display_monitor):
         self.display_monitor = display_monitor
         self.displays = self.display_monitor.connected_displays()
-        self.root = tk.Tk()
-        self.root.title("Displays")
-        self.root.call('tk', 'scaling', 5)
         self.selected_displays = []
 
     def show(self):
-        frame = tk.Frame(self.root)
-        label = tk.Label(frame, text="Select the monitors to turn on/off:")
-        label.grid(row=0, column=0, columnspan=2)
+        window = Gtk.Window(title="Displays")
+        window.set_default_size(300, 200)
+        window.set_border_width(20)  # Set the window border width
+        window.connect("destroy", Gtk.main_quit)
 
+        main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=20)
+        main_box.set_margin_top(20)  # Set top margin
+        main_box.set_margin_bottom(20)  # Set bottom margin
+        main_box.set_margin_start(20)  # Set left margin
+        main_box.set_margin_end(20)  # Set right margin
+
+        window.add(main_box)
+
+        label = Gtk.Label(label="Select the monitors to turn on/off:")
+        main_box.pack_start(label, False, False, 0)
+
+        outer_grid = Gtk.Grid()
+        outer_grid.set_column_spacing(20)
+        outer_grid.set_row_spacing(20)
+        main_box.pack_start(outer_grid, False, False, 0)
+
+        row = 0
+        column = 0
         for i, display_info in enumerate(self.displays):
             display_name = display_info[0]
             modes = display_info[1][:10]  # Limit to the first 10 modes
 
-            display_frame = tk.Frame(frame)
-            display_frame.grid(row=i // 2, column=i % 2)
+            display_grid = Gtk.Grid()
+            display_grid.set_column_spacing(10)
+            display_grid.set_row_spacing(10)
+            outer_grid.attach(display_grid, column, row, 1, 1)
 
-            display_label = tk.Label(display_frame, text=f"{display_name}")
-            display_label.grid(row=0, column=0, columnspan=5)
+            display_label = Gtk.Label(label=display_name)
+            display_grid.attach(display_label, 0, 0, 1, 1)
 
-            var_display = tk.IntVar(
-                    value=1 if display_name in
-                    self.display_monitor.connected_displays() else 0)
-            display_check_box = tk.Checkbutton(
-                    display_frame, variable=var_display)
-            display_check_box.grid(row=1, column=0, columnspan=5)
-            display_check_box.config(
-                    command=self.create_toggle_modes_func(var_display, i))
+            display_check_button = Gtk.CheckButton()
+            display_check_button.set_active(
+                    display_name in [display[0] for display in self.displays])
+            display_check_button.connect("toggled", self.toggle_modes, i)
+            display_grid.attach(display_check_button, 1, 0, 1, 1)
+
+            mode_grid = Gtk.Grid()
+            mode_grid.set_column_spacing(10)
+            mode_grid.set_row_spacing(10)
+            display_grid.attach(mode_grid, 0, 1, 2, 1)
 
             var_modes = []
             for j, mode in enumerate(modes):
-                var_mode = tk.IntVar(value=1 if j == 0 else 0)
-                mode_check_box = tk.Checkbutton(
-                        display_frame, text=mode, variable=var_mode,
-                        state=tk.DISABLED)
-                mode_check_box.grid(row=(j // 5) + 2, column=j % 5)
-                var_modes.append((mode, mode_check_box, var_mode))
+                mode_check_button = Gtk.CheckButton(label=mode)
+                mode_check_button.set_sensitive(j == 0)
+                mode_grid.attach(mode_check_button, j % 5, j // 5, 1, 1)
+                var_modes.append((mode, mode_check_button))
 
-            self.selected_displays.append(
-                    (display_name, var_display, var_modes))
+            self.selected_displays.append((display_name, display_check_button, var_modes))
 
-        button = tk.Button(frame, text="Submit", command=self.submit)
-        button.grid(row=(len(self.displays) // 2) + 3, column=0, columnspan=5)
+            column += 1
+            if column > 1:
+                row += 1
+                column = 0
 
-        frame.pack()
-        self.root.mainloop()
+        submit_button = Gtk.Button(label="Submit")
+        submit_button.connect("clicked", self.submit)
+        outer_grid.attach(submit_button, 0, row + 1, 2, 1)
 
-    def create_toggle_modes_func(self, var_display, index):
-        def toggle_modes():
-            var_modes = self.selected_displays[index][2]
-            state = tk.NORMAL if var_display.get() == 1 else tk.DISABLED
-            for _, mode_check_box, _ in var_modes:
-                mode_check_box.configure(state=state)
-        return toggle_modes
+        window.show_all()
+        # Set display check button active if display is active
+        for i, display_info in enumerate(self.displays):
+            display_name = display_info[0]
+            display_check_button = self.selected_displays[i][1]
+            if display_info[3] == "active":
+                display_check_button.set_active(True)
+        Gtk.main()
 
-    def submit(self):
-        for display_name, var_display, var_modes in self.selected_displays:
-            if var_display.get() == 0:
-                self.display_monitor.turn_off_display(display_name)
-            else:
-                selected_mode = None
-                for mode, mode_check_box, mode_var in var_modes:
-                    if mode_var.get() == 1:
-                        selected_mode = mode
-                        break
+    def toggle_modes(self, widget, index):
+        display_name, _, var_modes = self.selected_displays[index]
+        state = widget.get_active()
+        for _, mode_check_button in var_modes:
+            mode_check_button.set_sensitive(state)
 
-                if selected_mode:
-                    self.display_monitor.turn_on_display(
-                            display_name, selected_mode, primary=False)
-                else:
-                    # If no mode is selected, turn on display with first mode
-                    self.display_monitor.turn_on_display(
-                            display_name, var_modes[0][0], primary=False)
+        if not state:
+            for _, mode_check_button in var_modes:
+                mode_check_button.set_active(False)
 
-        self.root.destroy()
+    def submit(self, button):
+        selected_displays = []
+        primary_display_selected = False
+        extended_display_selected = False
+
+        for display_name, display_check_button, var_modes in self.selected_displays:
+            if display_check_button.get_active():
+                selected_modes = [
+                    mode for mode, mode_check_button in var_modes if mode_check_button.get_active()
+                ]
+                if display_name == "primary":
+                    primary_display_selected = True
+                elif display_name == "extended":
+                    extended_display_selected = True
+
+                if selected_modes:
+                    state = "active" if is_primary != "primary" \
+                            else "inactive"
+                    selected_displays.append(
+                            (display_name, selected_modes, is_primary, state))
+
+        if not primary_display_selected and not extended_display_selected \
+                and len(selected_displays) == 0:
+            dialog = Gtk.MessageDialog(
+                transient_for=None,
+                flags=0,
+                message_type=Gtk.MessageType.ERROR,
+                buttons=Gtk.ButtonsType.OK,
+                text="Please select at least one display."
+            )
+            dialog.run()
+            dialog.destroy()
+            return
+
+        for display_name, modes, is_primary, state in selected_displays:
+            self.display_monitor.turn_on_display(
+                    display_name, modes, is_primary, state=state)
+
+        if not primary_display_selected:
+            self.display_monitor.turn_off_display(display_name)
+
+        Gtk.main_quit()
+
 
 
 if __name__ == "__main__":
