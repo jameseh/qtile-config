@@ -1,5 +1,3 @@
-# -*- mode: python ; coding: utf-8 -*-
-
 from libqtile import qtile, widget, bar
 from libqtile.lazy import lazy
 

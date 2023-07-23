@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Define the rainbow color scheme
 colors = {
     "primary": [

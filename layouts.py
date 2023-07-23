@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from libqtile import layout
 
 from color_scheme import colors
