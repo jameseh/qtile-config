@@ -1,43 +1,32 @@
-import sys
 import subprocess
+import sys
 from pathlib import Path
-
 import psutil
+import logging
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 class ProcessManager:
     """
-       A simple process manager that can start and kill processes.
-
-       The process manager takes a list of programs and the number of instances
-       to start for each program. It will start the specified number of
-       instances of each program, and will kill all of the processes when it
-       is destroyed.
+    A simple process manager that can start and kill processes.
 
     Usage:
-
-        ```
         process_manager = ProcessManager("programs.txt")
         process_manager.start_processes()
         print(f"{len(process_manager.processes)} processes are running")
         process_manager.kill_processes()
-        ```
 
     Programs file format:
+        The programs file contains lines in the format `program_name number_of_instances`.
+        If the number of instances is not specified, it defaults to 1.
 
-        The programs file is a text file that contains a list of programs and
-        the number of instances to start for each program. Each line in the
-        file should be in the format program_name number_of_instances. If the
-        number of instances is not specified, it defaults to 1.
-
-        For example, the following lines would start two instances of the
-        alacritty program and one instance of the firefox program:
-
+        Example:
         ```
         alacritty 2
         firefox
         ```
     """
+    
     def __init__(self, programs_file):
         self.programs_file = Path(programs_file)
         self.processes = []
@@ -45,67 +34,71 @@ class ProcessManager:
 
     def start_processes(self):
         if not self.programs_file.exists():
-            raise FileNotFoundError(
-                f"FileNotFoundError: '{self.programs_file}'"
-            )
+            raise FileNotFoundError(f"'{self.programs_file}' not found.")
 
         with open(self.programs_file, "r") as f:
-            for line in f:
-                # Remove leading and trailing whitespace
+            for line_num, line in enumerate(f, start=1):
                 stripped_line = line.strip()
-                # Only start a process if the line isn't empty
                 if stripped_line:
                     try:
-                        # Get the program name and number of instances to start
-                        (program_name,
-                         number_of_instances) = line.rsplit()
+                        parts = stripped_line.split(maxsplit=1)
+                        program_name = parts[0]
+                        number_of_instances = int(parts[1]) if len(parts) > 1 else 1
                     except ValueError:
-                        # Ignore empty lines and lines with only program name
-                        program_name = line.strip()
-                        number_of_instances = 1
+                        logging.error(f"Invalid format on line {line_num}: '{line.strip()}'")
+                        continue
 
-                    # Count the number of instances of the app running
-                    running_processes = len(
-                        [process for process in psutil.process_iter()
-                         if process.name() == program_name])
+                    running_processes = self._count_running_instances(program_name)
+                    instances_to_start = number_of_instances - running_processes
 
-                    # Start the remaining instances of the app
-                    for _ in range(int(number_of_instances)
-                                   - int(running_processes)):
+                    for _ in range(instances_to_start):
                         try:
-                            # Start the process directly
-                            process = subprocess.Popen(
-                                    Path(program_name),
-                                    shell=False)
+                            process = subprocess.Popen([program_name], shell=False)
                             self.processes.append(process)
-                        except Exception:
-                            # Ignore any errors that occur
-                            pass
+                            logging.info(f"Started '{program_name}' (PID: {process.pid})")
+                        except Exception as e:
+                            logging.error(f"Failed to start '{program_name}': {e}")
 
         self.all_processes_launched = True
 
+    def _count_running_instances(self, program_name):
+        """Helper method to count currently running instances of a given program."""
+        return sum(1 for p in psutil.process_iter(attrs=["name"]) if p.info["name"] == program_name)
+
     def kill_processes(self):
         for process in self.processes:
-            # Terminate the process and all of its children
-            gone, alive = psutil.wait_procs(
-                    [process], timeout=5, callback=on_terminate)
+            try:
+                logging.info(f"Terminating process PID: {process.pid}")
+                process.terminate()
+                gone, alive = psutil.wait_procs([process], timeout=5, callback=self._on_terminate)
 
-            # If any child processes are still alive, kill them
-            for child_process in alive:
-                child_process.kill()
+                for child in alive:
+                    logging.warning(f"Killing child process PID: {child.pid}")
+                    child.kill()
+            except psutil.NoSuchProcess:
+                logging.warning(f"Process PID {process.pid} does not exist.")
+            except Exception as e:
+                logging.error(f"Error terminating process PID {process.pid}: {e}")
+        self.processes.clear()
 
+    def _on_terminate(self, proc):
+        logging.info(f"Process PID: {proc.pid} has terminated.")
 
-def on_terminate(proc):
-    print(f"process {proc} terminated with exit code {proc.returncode}")
+    def __del__(self):
+        if self.processes:
+            logging.info("Cleaning up remaining processes...")
+            self.kill_processes()
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 1:
-        print("Please provide a programs list .txt file")
+    if len(sys.argv) < 2:
+        logging.error("Usage: python process_manager.py <programs_file>")
         sys.exit(1)
 
     programs_file = sys.argv[1]
     process_manager = ProcessManager(programs_file)
-    process_manager.start_processes()
-    print(f"{len(process_manager.processes)} processes are running")
-    process_manager.kill_processes()
+    
+    try:
+        process_manager.start_processes()
+    finally:
+        process_manager.kill_processes()
