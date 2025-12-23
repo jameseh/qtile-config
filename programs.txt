@@ -1,0 +1,13 @@
+nvidia-settings
+rog-control-center
+dunst
+copyq
+firefox-developer-edition
+kdeconnect-indicator
+rog_control_center
+alacritty 3
+gnome-power-manager
+picom
+polkit-gnome-authentication-agent-1
+flameshot
+nm-applet
